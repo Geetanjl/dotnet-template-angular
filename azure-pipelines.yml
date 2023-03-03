@@ -17,7 +17,7 @@ stages:
       displayName: Nuget restore
       inputs:
         command: 'restore'
-        restoreSolution: 'MyApp.sln'
+        restoreSolution: 'angular-spa/MyApp.sln'
         feedsToUse: 'select'
     - task: UseDotNet@2
       displayName: Dotnet sdk
