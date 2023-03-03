@@ -1,0 +1,71 @@
+# Starter pipeline
+# Start with a minimal pipeline that you can customize to build and deploy your code.
+# Add steps that build, run tests, deploy, and more:
+# https://aka.ms/yaml
+
+trigger:
+- master
+
+stages:
+- stage: secure_buildstage
+  pool:
+    vmImage: windows-latest
+  jobs:
+  - job: Build_Backend
+    steps:
+    - task: NuGetCommand@2
+      displayName: Nuget restore
+      inputs:
+        command: 'restore'
+        restoreSolution: 'MyApp.sln'
+        feedsToUse: 'select'
+    - task: UseDotNet@2
+      displayName: Dotnet sdk
+      inputs:
+        packageType: 'sdk'
+        version: 
+    - task: DotNetCoreCLI@2
+      displayName: Dotnet restore
+      inputs:
+        command: 'restore'
+        projects: 'angular-spa/MyApp.sln'
+        feedsToUse: 'select'
+    - task: DotNetCoreCLI@2
+      displayName: Dotnet build
+      inputs:
+        command: 'build'
+        projects: 'angular-spa/MyApp.sln'
+    - task: DotNetCoreCLI@2
+      displayName: Dotnet test
+      inputs:
+        command: 'test'
+        projects: 'angular-spa/MyApp.sln'
+    - task: PublishBuildArtifacts@1
+      displayName: Publish Backend Artifact
+      inputs:
+        PathtoPublish: '$(Build.ArtifactStagingDirectory)'
+        ArtifactName: 'Backend'
+        publishLocation: 'Container'
+- stage: 
+  pool:
+    vmImage: Ubuntu-latest
+  jobs:
+  - job: frontend_build
+    steps:
+    - task: Npm@1
+      displayName: Npm Install
+      inputs:
+        command: 'install'
+        workingDir: 'MyApp'
+    - task: Npm@1
+      displayName: Npm run and build
+      inputs:
+        command: 'custom'
+        workingDir: 'MyApp'
+        customCommand: 'run build'
+    - task: PublishBuildArtifacts@1
+      displayName: Publish Frontend Artifact
+      inputs:
+        PathtoPublish: '$(Build.ArtifactStagingDirectory)'
+        ArtifactName: 'Frontend'
+        publishLocation: 'Container'
